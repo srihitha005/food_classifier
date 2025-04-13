@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: rotten-classifier-frontend
+    env: static
+    runtime: static
+    region: oregon
+    plan: free
+    staticPublishPath: ./frontend
+    buildCommand: echo "No build required"
+    startCommand: static
