@@ -16,7 +16,7 @@ CORS(app, resources={r"/predict": {"origins": "http://localhost:8080"}})
 
 # Load the TFLite model
 try:
-    interpreter = tf.lite.Interpreter(model_path='models/rotten_classifier_model.tflite')
+    interpreter = tf.lite.Interpreter(model_path='backend/models/rotten_classifier_model.tflite')   
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
