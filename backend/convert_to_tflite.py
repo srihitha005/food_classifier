@@ -4,14 +4,16 @@ try:
     # Load the Keras model
     model = tf.keras.models.load_model('models/rotten_classifier_model.h5')
 
-    # Convert to TFLite with compatibility settings
+    # Convert to TFLite with strict compatibility
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]  # Enable quantization
+    # Disable optimizations to avoid newer op versions
+    converter.optimizations = []  # Remove quantization for now
     converter.target_spec.supported_ops = [
-        tf.lite.OpsSet.TFLITE_BUILTINS,  # Include all TFLite built-in ops
-        tf.lite.OpsSet.SELECT_TF_OPS      # Include select TensorFlow ops for compatibility
+        tf.lite.OpsSet.TFLITE_BUILTINS,  # Use only TFLite built-in ops
+        # Remove SELECT_TF_OPS to avoid TensorFlow-specific ops
     ]
-    converter.allow_custom_ops = False  # Disable custom ops to ensure standard support
+    converter.allow_custom_ops = False  # Ensure no custom ops
+    converter._experimental_lower_tensor_list_ops = False  # Avoid experimental ops
 
     # Convert the model
     tflite_model = converter.convert()
