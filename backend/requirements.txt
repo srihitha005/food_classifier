@@ -1,6 +1,6 @@
 Flask==2.1.1
 Flask-CORS
-tensorflow==2.12.0
+tensorflow==2.15.0
 numpy
 Werkzeug==2.3.7
 keras

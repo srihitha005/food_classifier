@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
+import os
 import sys
 
 # Force UTF-8 encoding for console output
@@ -12,11 +13,13 @@ sys.stderr.reconfigure(encoding='utf-8')
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app, resources={r"/predict": {"origins": "http://localhost:8080"}})
+CORS(app, resources={r"/predict": {"origins": "*"}})  # Allow all origins for now (update for production)
 
 # Load the TFLite model
 try:
-    interpreter = tf.lite.Interpreter(model_path='backend/models/rotten_classifier_model.tflite')   
+    # Use relative path from the script location
+    model_path = os.path.join(os.path.dirname(__file__), 'models/rotten_classifier_model.tflite')
+    interpreter = tf.lite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -61,4 +64,5 @@ def predict():
 
 # Run the Flask application
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))  # Use PORT env var for Render, default to 5000 locally
+    app.run(host='0.0.0.0', port=port)
