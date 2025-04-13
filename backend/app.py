@@ -14,39 +14,44 @@ sys.stderr.reconfigure(encoding='utf-8')
 app = Flask(__name__)
 CORS(app, resources={r"/predict": {"origins": "http://localhost:8080"}})
 
-# Load the pre-trained model
+# Load the TFLite model
 try:
-    model = tf.keras.models.load_model('models/rotten_classifier_model.tflite')
-    print("Model loaded successfully.", flush=True)
-    
+    interpreter = tf.lite.Interpreter(model_path='models/rotten_classifier_model.tflite')
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    print("TFLite model loaded successfully.", flush=True)
 except Exception as e:
-    print(f"Error loading model: {e}", flush=True)
+    print(f"Error loading TFLite model: {e}", flush=True)
     raise
- 
-# Define the prediction function
+
+# Define the prediction function using TFLite
 def predict_rotten(img):
     # Preprocess the image
     img = img.resize((224, 224))
-    img_array = np.array(img) / 255.0
+    img_array = np.array(img, dtype=np.float32) / 255.0
     img_array = np.expand_dims(img_array, axis=0)
-    # Make prediction
-    prediction = model.predict(img_array)
-    result = "rotten" if prediction[0][0] > 0.5 else "fresh"
-    confidence = prediction[0][0] if result == "rotten" else 1 - prediction[0][0]
+
+    # Set input tensor and run inference
+    interpreter.set_tensor(input_details[0]['index'], img_array)
+    interpreter.invoke()
+
+    # Get prediction
+    output = interpreter.get_tensor(output_details[0]['index'])
+    prediction = output[0][0]
+    result = "rotten" if prediction > 0.5 else "fresh"
+    confidence = prediction if result == "rotten" else 1 - prediction
     return result, confidence
 
 # Define the API endpoint for image prediction
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Check if a file is part of the request
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
-    # Check if a file was selected
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
     try:
-        # Load and preprocess the image
         img = Image.open(io.BytesIO(file.read())).convert('RGB')
         result, confidence = predict_rotten(img)
         return jsonify({'result': result, 'confidence': float(confidence)})
