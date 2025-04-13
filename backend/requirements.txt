@@ -1,0 +1,8 @@
+Flask==2.1.1
+Flask-CORS
+tensorflow==2.16.1
+numpy==1.26.4
+Werkzeug==2.3.7
+keras
+Pillow
+gunicorn
