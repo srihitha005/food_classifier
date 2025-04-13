@@ -7,4 +7,4 @@ services:
     plan: free
     workingDir: backend
     buildCommand: pip install -r backend/requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn backend.app:app
