@@ -16,7 +16,7 @@ CORS(app, resources={r"/predict": {"origins": "http://localhost:8080"}})
 
 # Load the pre-trained model
 try:
-    model = tf.keras.models.load_model('models/rotten_classifier_model.h5')
+    model = tf.keras.models.load_model('models/rotten_classifier_model.tflite')
     print("Model loaded successfully.", flush=True)
     
 except Exception as e:
